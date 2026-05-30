@@ -37,6 +37,11 @@
         <strong>{{ partnerGateCount }}</strong>
         <small>must close before submit</small>
       </article>
+      <article class="metric-tile accent-gold">
+        <span>Judge score</span>
+        <strong>{{ competitive.weighted_score }}</strong>
+        <small>/100 synthetic competitive read</small>
+      </article>
     </section>
 
     <section class="workspace">
@@ -52,6 +57,10 @@
         <button :class="tabClass('readiness')" @click="activeTab = 'readiness'">
           <i data-lucide="clipboard-check"></i>
           Readiness
+        </button>
+        <button :class="tabClass('judge')" @click="activeTab = 'judge'">
+          <i data-lucide="trophy"></i>
+          Judge Room
         </button>
         <img src="./assets/trust_by_design_guide.png" alt="Trust by Design guide cover" />
       </nav>
@@ -121,6 +130,36 @@
           </article>
         </div>
       </section>
+
+      <section class="content-panel" v-if="activeTab === 'judge'">
+        <div class="section-heading">
+          <h2>Competitive Judge Room</h2>
+          <p>Weighted Stage 1 rubric, likely rivals, and answer angles that sharpen the submission.</p>
+        </div>
+        <div class="judge-grid">
+          <article v-for="dimension in competitive.dimensions" :key="dimension.id" class="judge-card">
+            <div>
+              <strong>{{ dimension.label }}</strong>
+              <small>{{ dimension.weight }}% weight</small>
+            </div>
+            <span>{{ dimension.score }}</span>
+            <p>{{ dimension.must_improve }}</p>
+          </article>
+        </div>
+        <div class="battle-row">
+          <section>
+            <h3>Top Rival</h3>
+            <p>{{ topRival.name }}</p>
+            <small>{{ topRival.counter }}</small>
+          </section>
+          <section>
+            <h3>Kill Shots</h3>
+            <ul>
+              <li v-for="shot in competitive.kill_shots" :key="shot">{{ shot }}</li>
+            </ul>
+          </section>
+        </div>
+      </section>
     </section>
   </main>
 </template>
@@ -138,6 +177,12 @@ export default {
         metrics: [],
         decisions: [],
         findings: []
+      },
+      competitive: {
+        weighted_score: 0,
+        dimensions: [],
+        rivals: [],
+        kill_shots: []
       }
     };
   },
@@ -147,9 +192,15 @@ export default {
     },
     genderCount() {
       return this.report.metrics.length;
+    },
+    topRival() {
+      return this.competitive.rivals[0] || { name: 'Partner data gap', counter: 'Close partner evidence first.' };
     }
   },
   mounted() {
+    if (window.location.hash.includes('judge')) {
+      this.activeTab = 'judge';
+    }
     this.loadReport();
   },
   updated() {
@@ -157,8 +208,12 @@ export default {
   },
   methods: {
     async loadReport() {
-      const response = await fetch('./data/trust_report.json', { cache: 'no-store' });
-      this.report = await response.json();
+      const [trustResponse, competitiveResponse] = await Promise.all([
+        fetch('./data/trust_report.json', { cache: 'no-store' }),
+        fetch('./data/competitive_report.json', { cache: 'no-store' })
+      ]);
+      this.report = await trustResponse.json();
+      this.competitive = await competitiveResponse.json();
       this.$nextTick(this.paintIcons);
     },
     paintIcons() {
