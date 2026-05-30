@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trust Layer Reporting</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime/uno.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="./scripts/sfc_loader.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <main class="boot">
+        <span class="boot-dot"></span>
+        Loading trust report
+      </main>
+    </div>
+    <script>
+      window.loadSimpleSfc('./src/App.vue').then((App) => {
+        Vue.createApp(App).mount('#app');
+      });
+    </script>
+  </body>
+</html>
